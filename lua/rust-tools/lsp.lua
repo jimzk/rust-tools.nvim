@@ -5,22 +5,26 @@ local server_status = require("rust-tools.server_status")
 
 local M = {}
 
-local function setup_autocmds()
-  local group = vim.api.nvim_create_augroup("RustToolsAutocmds", { clear = true })
+M.group = vim.api.nvim_create_augroup("RustToolsAutocmds", { clear = true })
 
+local function setup_autocmds()
   if rt.config.options.tools.reload_workspace_from_cargo_toml then
     vim.api.nvim_create_autocmd("BufWritePost", {
       pattern = "*/Cargo.toml",
       callback = require('rust-tools.workspace_refresh')._reload_workspace_from_cargo_toml,
-      group = group,
+      group = M.group,
     })
   end
 
   vim.api.nvim_create_autocmd("VimEnter", {
     pattern = "*.rs",
     callback = rt.lsp.start_standalone_if_required,
-    group = group,
+    group = M.group,
   });
+
+  if rt.config.options.tools.on_type_formatting then
+    require("rust-tools.on_type_formatting").setup_on_type_assist()
+  end
 end
 
 local function setup_commands()
@@ -137,6 +141,9 @@ local function setup_capabilities()
 
   -- snippets
   capabilities.textDocument.completion.completionItem.snippetSupport = true
+  capabilities.textDocument.onTypeFormatting = {
+    dynamicRegistration = true,
+  }
 
   -- send actions with hover request
   capabilities.experimental = {

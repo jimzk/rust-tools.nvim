@@ -18,6 +18,7 @@ local M = {
   join_lines = nil,
   lsp = nil,
   move_item = nil,
+  on_type_formatting = nil,
   open_cargo_toml = nil,
   parent_module = nil,
   runnables = nil,
@@ -106,6 +107,9 @@ function M.setup(opts)
 
   local move_item = require("rust-tools.move_item")
   M.move_item = move_item
+
+  local on_type_formatting = require("rust-tools.on_type_formatting")
+  M.on_type_formatting = on_type_formatting
 
   local open_cargo_toml = require("rust-tools.open_cargo_toml")
   M.open_cargo_toml = open_cargo_toml

@@ -23,6 +23,9 @@ M.options = {
     -- The callback receives one parameter indicating the `health` of the server: "ok" | "warning" | "error"
     on_initialized = nil,
 
+    -- https://rust-analyzer.github.io/manual.html#on-typing-assists
+    on_type_formatting = true,
+
     -- automatically call RustReloadWorkspace when writing to a Cargo.toml file.
     reload_workspace_from_cargo_toml = true,
 
