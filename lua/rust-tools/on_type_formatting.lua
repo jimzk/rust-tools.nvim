@@ -1,11 +1,12 @@
 local rt = require("rust-tools")
 local M = {}
 
-local debounce = 50
-local disabled = false
-
 local function handler(err, result, ctx)
   -- vim.print("err:", err, "result:", result)
+  if err then
+    -- vim.print("Could not execute request to server: ", err)
+    return
+  end
   if result == nil then
     return
   end
@@ -29,21 +30,7 @@ local function on_type()
     -- vim.notify("M.trigger_characters: " .. vim.inspect(M.trigger_characters))
   end
 
-  if disabled then
-    return
-  else
-    disabled = true
-    vim.defer_fn(function()
-      disabled = false
-    end, debounce)
-  end
-
-  -- local char = vim.v.char
-  local line = vim.fn.getline(".")
-  local col = vim.fn.col(".")
-  -- vim.print("line:", line, "col:", col)
-  local char = line:sub(col - 1, col - 1)
-  -- vim.print("char:", "`" .. char .. "`")
+  local char = vim.v.char
   if #char ~= 1 then
     return
   end
@@ -56,18 +43,22 @@ local function on_type()
 
   -- Provides textDocument and position
   local params = vim.lsp.util.make_position_params()
+  -- Move right by one because we just typed a character
+  -- R-a throws an assertion error otherwise
+  params.position.character = params.position.character + 1
   -- Provides ch
   params.ch = char
   -- Provides textDocument and options
   local formatting_opts = vim.lsp.util.make_formatting_params().options
   params.options = formatting_opts
   -- vim.print(params)
-  rt.utils.request(0, "textDocument/onTypeFormatting", params, handler)
+  vim.schedule(function()
+    rt.utils.request(0, "textDocument/onTypeFormatting", params, handler)
+  end)
 end
 
 function M.setup_on_type_assist()
-  vim.api.nvim_create_autocmd("TextChangedI", {
-  -- vim.api.nvim_create_autocmd("InsertCharPre", {
+  vim.api.nvim_create_autocmd("InsertCharPre", {
     group = require 'rust-tools.lsp'.group,
     callback = on_type,
   })
