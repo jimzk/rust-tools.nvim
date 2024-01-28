@@ -139,11 +139,13 @@ local function parse_hints(result, bufnr)
       end
     end
 
-    local line_len =
-      string.len(vim.api.nvim_buf_get_lines(bufnr, line, line + 1, true)[1])
-    max_line_len = math.max(max_line_len, line_len)
-
-    add_line()
+    local ok, lines =
+      pcall(vim.api.nvim_buf_get_lines, bufnr, line, line + 1, true)
+    if ok then
+      local line_len = string.len(lines[1])
+      max_line_len = math.max(max_line_len, line_len)
+      add_line()
+    end
   end
   return map, max_line_len
 end

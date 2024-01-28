@@ -19,8 +19,8 @@ end
 
 local function on_type()
   if not M.trigger_characters then
-    local capabilities = vim.lsp.get_clients { name = "rust_analyzer" }[1].server_capabilities
-        .documentOnTypeFormattingProvider
+    local capabilities =
+      vim.lsp.get_active_clients({ name = "rust_analyzer" })[1].server_capabilities.documentOnTypeFormattingProvider
     if not capabilities then
       return
     end
@@ -36,7 +36,7 @@ local function on_type()
   end
 
   -- vim.print("checking: " .. char, M.trigger_characters)
-  if not vim.list_contains(M.trigger_characters, char) then
+  if not vim.tbl_contains(M.trigger_characters, char) then
     return
   end
   -- vim.notify("on_type: " .. char .. ", sending request")
@@ -59,7 +59,7 @@ end
 
 function M.setup_on_type_assist()
   vim.api.nvim_create_autocmd("InsertCharPre", {
-    group = require 'rust-tools.lsp'.group,
+    group = require("rust-tools.lsp").group,
     callback = on_type,
   })
 end
